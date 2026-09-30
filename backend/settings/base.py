@@ -16,7 +16,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -33,13 +33,11 @@ THIRD_PARTY_APPS = [
     'anymail',
     'django_extensions',
     'corsheaders',
-    'django_summernote',
     'rest_framework',    
     'rest_framework.authtoken',
     'django_filters',
     'django_countries',
     'easy_thumbnails',    
-    'debug_toolbar',
 ]
 
 LOCAL_APPS = ['apps.fructs','apps.actions','apps.images','apps.emails','apps.coupons','apps.cart']
@@ -49,7 +47,6 @@ SITE_ID = 1
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -65,7 +62,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR, "templates"],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -100,7 +97,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR, "static"]
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -114,15 +111,15 @@ REST_FRAMEWORK = {
     ],
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = ("http://localhost:8000",)
 
-ANYMAIL = { "SENDINBLUE_API_KEY": env('SENDINBLUE_API_KEY'),"SENDINBLUE_API_URL": env('SENDINBLUE_API_URL'), }
+ANYMAIL = { "SENDINBLUE_API_KEY": env('SENDINBLUE_API_KEY', default=''),"SENDINBLUE_API_URL": env('SENDINBLUE_API_URL', default='https://api.brevo.com/v3'), }
 
-EMAIL_BACKEND=env('EMAIL_BACKEND')
-DEFAULT_FROM_EMAIL=env('DEFAULT_FROM_EMAIL')
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+DEFAULT_FROM_EMAIL=env('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
 
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -131,3 +128,8 @@ INTERNAL_IPS = [
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 REDIS_DB = 0
+
+# Session cart data stays JSON serializable; Redis is only used by image metrics.
+CART_SESSION_ID = "cart"
+DATABASES = {"default": env.db(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
+STATIC_ROOT = BASE_DIR / "staticfiles"

@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from distutils.command.upload import upload
 
 from django.db import models
 from django.utils import timezone
@@ -62,6 +61,7 @@ class Unitie(models.Model):
 
 
 class Product(models.Model):
+    """Catalog metadata; order processing and stock tracking are separate concerns."""
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, max_length=50)
     description = models.TextField()
@@ -108,7 +108,7 @@ class Testimonial(models.Model):
 
 
     def __str__(self):
-        return self.name
+        return self.name or "Unnamed testimonial"
 
 class Title(models.Model):    
     label = models.CharField(max_length=50)

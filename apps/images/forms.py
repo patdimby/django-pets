@@ -1,3 +1,4 @@
+from urllib.parse import urlsplit
 from django import forms
 from .models import Image
 from django.core.files.base import ContentFile
@@ -16,7 +17,7 @@ class ImageCreateForm(forms.ModelForm):
     def clean_url(self):
         url = self.cleaned_data['url']
         valid_extensions = ['jpg', 'jpeg', 'png']
-        extension = url.rsplit('.', 1)[1].lower()
+        extension = urlsplit(url).path.rsplit('.', 1)[-1].lower()
         if extension not in valid_extensions:
             raise forms.ValidationError('The given URL does not ' \
                                         'match valid image extensions.')
@@ -28,10 +29,11 @@ class ImageCreateForm(forms.ModelForm):
         image = super().save(commit=False)
         image_url = self.cleaned_data['url']
         name = slugify(image.title)
-        extension = image_url.rsplit('.', 1)[1].lower()
+        extension = urlsplit(image_url).path.rsplit('.', 1)[-1].lower()
         image_name = f'{name}.{extension}'
         # download image from the given URL
-        response = requests.get(image_url)
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
         image.image.save(image_name,
                          ContentFile(response.content),
                          save=False)

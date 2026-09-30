@@ -9,6 +9,7 @@ from .forms import CouponApplyForm
 def coupon_apply(request):
     now = timezone.now()
     form = CouponApplyForm(request.POST)
+    request.session['coupon_id'] = None
     if form.is_valid():
         code = form.cleaned_data['code']
         try:
@@ -17,6 +18,6 @@ def coupon_apply(request):
                                         valid_to__gte=now,
                                         active=True)
             request.session['coupon_id'] = coupon.id
-        except Coupon.DoesNotExist:
+        except (Coupon.DoesNotExist, Coupon.MultipleObjectsReturned):
             request.session['coupon_id'] = None
     return redirect('cart:cart_detail')

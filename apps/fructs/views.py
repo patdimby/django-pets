@@ -1,91 +1,81 @@
-from django.shortcuts import render,  redirect
+"""Catalog pages build fresh context for each request, never at import time."""
 from django.core.paginator import Paginator
-
-from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_POST
 from .models import Product, Categorie, Testimonial, Title, Location, Breadcumb
-from sendgrid.helpers.mail import Mail
-from django.core.mail import send_mail
-from .forms import *
 
 
 def setContext():
-    context = {}
-    products_list = Product.objects.all()
-    context['titles']= Title.objects.all()
-    context['filtered'] = [x for x in products_list if x.isDemo == True]
-    context['products'] = [x for x in products_list if x.isDemo == False]    
-    context['testimonials']= Testimonial.objects.all()    
-    context['categories'] = Categorie.objects.all()
-    context['demo'] = products_list[:3]
-    addresses = Location.objects.all()
-    context['location'] = addresses[0]
-    return context
+    """Allow a fresh installation with no optional content or location records."""
+    products = Product.objects.all()
+    return {
+        'titles': Title.objects.all(),
+        'filtered': products.filter(isDemo=True),
+        'products': products.filter(isDemo=False),
+        'testimonials': Testimonial.objects.all(),
+        'categories': Categorie.objects.all(),
+        'demo': products[:3],
+        'location': Location.objects.first(),
+    }
 
-context = setContext()
 
-# Create your views here.
 def index(request):
-    # Pagination with 3 posts per page
-    paginator = Paginator(context['filtered'], 3)
-    page_number = request.GET.get('page', 1)           
-    context['filtered'] = paginator.page(page_number)
+    context = setContext()
+    context['filtered'] = Paginator(context['filtered'], 3).get_page(request.GET.get('page'))
     return render(request, 'fructs/index.html', context)
 
 
+def _page(request, slug, template=None):
+    context = setContext()
+    context['breadcumb'] = Breadcumb.objects.filter(slug=slug).first()
+    return render(request, template or f'fructs/{slug}.html', context)
+
+
 def about(request):
-    context['breadcumb'] = Breadcumb.objects.get(slug='about')
-    return render(request, 'fructs/about.html', context)
+    return _page(request, 'about')
+
 
 def cart(request):
-    context['breadcumb'] = Breadcumb.objects.get(slug='cart')    
-    return render(request, 'fructs/cart.html', context)
+    return _page(request, 'cart')
+
 
 def slider(request):
-    return render(request, 'fructs/index_2.html', context)
+    return _page(request, 'slider', 'fructs/index_2.html')
+
 
 def news(request):
-    context['breadcumb'] = Breadcumb.objects.get(slug='news')
-    return render(request, 'fructs/news.html', context)
-    
+    return _page(request, 'news')
+
+
+@require_POST
 def suscribe(request):
-    if request.method =='POST':
-        pass
+    # Subscription delivery has no configured workflow yet; never imply success.
+    return HttpResponse('Subscriptions are not implemented.', status=501)
+
 
 def shop(request):
-    products_list = Product.objects.all()
-    context['products'] = products_list.exclude(isDemo=True)  
-    # Pagination with 3 posts per page
-    paginator = Paginator(context['products'], 3)
-    page_number = request.GET.get('page', 1)           
-    context['products'] = paginator.page(page_number)
-    context['breadcumb'] = Breadcumb.objects.get(slug='shop')
+    context = setContext()
+    context['products'] = Paginator(context['products'], 3).get_page(request.GET.get('page'))
+    context['breadcumb'] = Breadcumb.objects.filter(slug='shop').first()
     return render(request, 'fructs/shop.html', context)
 
-def singleproduct(request, slug):
-    if slug:
-        pdt = Product.objects.get(slug=slug)
-        family = Product.objects.filter(label=pdt.label)
-        context['products'], context['pdt']  = list(family), pdt       
-        return render(request, 'fructs/single-product.html', context)
-    return render(request, 'fructs/single-product.html')
 
-def checkout(request):
-    context['breadcumb'] = Breadcumb.objects.get(slug='checkout')
+def singleproduct(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    context = setContext()
+    context.update(products=Product.objects.filter(label=product.label), pdt=product)
     return render(request, 'fructs/single-product.html', context)
 
 
+def checkout(request):
+    return _page(request, 'checkout')
+
+
 def contact(request):
-    context['breadcumb'] = Breadcumb.objects.get(slug='contact')    
-    return render(request, 'fructs/contact.html', context)
+    return _page(request, 'contact')
 
+
+@require_POST
 def send_email(request):
-  if request.method == 'POST':
-    # Form was submitted
-    form = EmailPostForm(request.POST)
-    if form.is_valid():
-      # Form fields passed validation
-      cd = form.cleaned_data
-
-
-
+    return HttpResponse('Contact delivery is not implemented.', status=501)

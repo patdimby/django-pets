@@ -24,7 +24,7 @@
 			<div class="row">
 				<div class="col-md-5">
 					<div class="single-product-img">
-						<img src="{{ pdt.image.url }}" alt="">
+						<img src="{% if pdt.image %}{{ pdt.image.url }}{% endif %}" alt="">
 					</div>
 				</div>
 				<div class="col-md-7">
@@ -36,7 +36,7 @@
 							<form action="{% url 'index' %}">
 								<input type="number" placeholder="0">
 							</form>
-							<a href="c{% url 'cart' %}" class="cart-btn"><i class="fas fa-shopping-cart"></i> Add to Cart</a>
+							<a href="{% url 'cart' %}" class="cart-btn"><i class="fas fa-shopping-cart"></i> Add to Cart</a>
 							<p><strong>Categories: </strong>{{ pdt.label }}</p>
 						</div>
 						<h4>Share:</h4>
@@ -69,7 +69,7 @@
 				<div class="col-lg-4 col-md-6 text-center">
 					<div class="single-product-item">
 						<div class="product-image">
-							<a href="{% url 'singleproduct' product.slug %}"><img src="{{ product.image.url }}" alt=""></a>
+							<a href="{% url 'singleproduct' product.slug %}"><img src="{% if product.image %}{{ product.image.url }}{% endif %}" alt=""></a>
 						</div>
 						<h3>{{ product.name }}</h3>
 						<p class="product-price"><span>Per {{ product.unite }}</span> {{ product.price }}$ </p>

@@ -7,7 +7,7 @@
                     {% for test in testimonials %}
                     <div class="single-testimonial-slider">
                         <div class="client-avater">
-                            <img src="{{ test.photo.url }}" alt="">
+                            <img src="{% if test.photo %}{{ test.photo.url }}{% endif %}" alt="">
                         </div>
                         <div class="client-meta">
                             <h3>{{ test.name}} <span>{{ test.work }}</span></h3>

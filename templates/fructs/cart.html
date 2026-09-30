@@ -28,7 +28,7 @@
 								{% for product in products %}
 								<tr class="table-body-row">
 									<td class="product-remove"><a href="#"><i class="far fa-window-close"></i></a></td>
-									<td class="product-image"><img src="{{ product.image.url }}" alt=""></td>
+									<td class="product-image"><img src="{% if product.image %}{{ product.image.url }}{% endif %}" alt=""></td>
 									<td class="product-name">{{ product.name }}</td>
 									<td class="product-price">{{ product.price }} €</td>
 									<td class="product-quantity"><input type="number" placeholder="0"></td>

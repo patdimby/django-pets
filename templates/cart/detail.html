@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Session cart{% endblock %}
+{% block content %}
+<h1>Session cart</h1>
+{% for item in cart %}<p>{{ item.product.name }} × {{ item.quantity }} — {{ item.total_price }}</p>{% empty %}<p>Your cart is empty.</p>{% endfor %}
+<p>Total after discount: {{ cart.get_total_price_after_discount }}</p>
+<form method="post" action="{% url 'coupons:apply' %}">{% csrf_token %}{{ coupon_apply_form.as_p }}<button type="submit">Apply coupon</button></form>
+{% endblock %}

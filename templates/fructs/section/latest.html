@@ -5,7 +5,7 @@
             {% for product in filtered %}
             <div class="col-lg-4 col-md-6">
                 <div class="single-latest-news">
-                    <a href="{% url 'singleproduct' product.slug %}"><div class="latest-news-bg"><img src="{{ product.image.url }}" alt=""></div></a>
+                    <a href="{% url 'singleproduct' product.slug %}"><div class="latest-news-bg"><img src="{% if product.image %}{{ product.image.url }}{% endif %}" alt=""></div></a>
                     <div class="news-text-box">
                         <h3><a href="{% url 'singleproduct' product.slug %}">{{ product.description }}.</a></h3>
                         <p class="blog-meta">
@@ -13,7 +13,7 @@
                             <span class="date"><i class="fas fa-calendar"></i>{{ product.date_posted }}</span>
                         </p>
                         <p class="excerpt">{{ product.sante }}.</p>
-                        <a href="{% url 'singleproduct' product.name %}" class="read-more-btn">read more <i class="fas fa-angle-right"></i></a>
+                        <a href="{% url 'singleproduct' product.slug %}" class="read-more-btn">read more <i class="fas fa-angle-right"></i></a>
                     </div>
                 </div>
             </div>

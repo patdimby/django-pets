@@ -63,7 +63,7 @@ def image_detail(request, id, slug):
 def image_like(request):
     image_id = request.POST.get('id')
     action = request.POST.get('action')
-    if image_id and action:
+    if image_id and action in {'like', 'unlike'}:
         try:
             image = Image.objects.get(id=image_id)
             if action == 'like':
@@ -72,7 +72,7 @@ def image_like(request):
             else:
                 image.users_like.remove(request.user)
             return JsonResponse({'status': 'ok'})
-        except Image.DoesNotExist:
+        except (Image.DoesNotExist, ValueError):
             pass
     return JsonResponse({'status': 'error'})
 
